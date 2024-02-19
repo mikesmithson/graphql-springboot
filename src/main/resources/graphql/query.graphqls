@@ -1,0 +1,22 @@
+type Query{
+    # Our first GQL query
+    firstQuery:String
+
+    # Second query with arguments
+    secondQuery(firstName:String!, lastName:String!): String
+
+    # Get all Students' Records
+    getAllStudents:[StudentResponse]
+}
+
+type StudentResponse {
+    id: ID!
+    name: String!
+    contact: String
+    result: [StudentSubjectResponse]
+}
+
+type StudentSubjectResponse {
+    subjectName: String!
+    marks: Float
+}

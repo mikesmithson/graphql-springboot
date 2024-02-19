@@ -7,6 +7,9 @@ type Query{
 
     # Get all Students' Records
     getAllStudents:[StudentResponse]
+
+    # Get all teachers with experience and subjects
+    getAllTeachers:[TeacherResponse]
 }
 
 type StudentResponse {
@@ -19,4 +22,16 @@ type StudentResponse {
 type StudentSubjectResponse {
     subjectName: String!
     marks: Float
+}
+
+type TeacherResponse {
+    id: ID!
+    name: String!
+    contact: String
+    courses:[TeacherCourseResponse]
+}
+
+type TeacherCourseResponse {
+    subjectName: String!
+    experience: String!
 }

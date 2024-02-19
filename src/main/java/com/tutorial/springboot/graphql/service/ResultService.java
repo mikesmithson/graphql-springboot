@@ -2,8 +2,10 @@ package com.tutorial.springboot.graphql.service;
 
 import com.tutorial.springboot.graphql.entity.Result;
 import com.tutorial.springboot.graphql.repository.ResultRepository;
+import com.tutorial.springboot.graphql.repository.SubjectRepository;
 import com.tutorial.springboot.graphql.response.StudentResponse;
 import com.tutorial.springboot.graphql.response.StudentSubjectResponse;
+import com.tutorial.springboot.graphql.response.TeacherSubjectResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,11 +17,12 @@ import java.util.stream.StreamSupport;
 @RequiredArgsConstructor
 @Slf4j
 public class ResultService {
-    private final ResultRepository repository;
+    private final ResultRepository resultRepository;
+    private final SubjectRepository subjectRepository;
 
     public List<StudentSubjectResponse> getResultForStudent(int studentId) {
         log.debug("In Result service fetching student grades");
-        return repository.findByStudentId(studentId).stream()
+        return resultRepository.findByStudentId(studentId).stream()
                 .map(result -> StudentSubjectResponse.builder()
                         .subjectName(result.getSubject().getSubjectName())
                         .marks(result.getMarks())
@@ -27,9 +30,19 @@ public class ResultService {
                 .toList();
     }
 
+    public List<TeacherSubjectResponse> getResultForTeacher(int teacherId) {
+        log.debug("In Result service fetching teacher subjects");
+        return subjectRepository.findSubjectsByTeacher_Id(teacherId).stream()
+                .map(result -> TeacherSubjectResponse.builder()
+                        .subjectName(result.getSubjectName())
+                        .experience(result.getExperience())
+                        .build())
+                .toList();
+    }
+
     public Map<StudentResponse, List<StudentSubjectResponse>> getResultForAllStudents(List<StudentResponse> studentResponses) {
         log.debug("fetching all responses");
-        List<Result> results = StreamSupport.stream(repository.findAll().spliterator(), false).toList();
+        List<Result> results = StreamSupport.stream(resultRepository.findAll().spliterator(), false).toList();
         Map<StudentResponse, List<StudentSubjectResponse>> batchMap = new LinkedHashMap<>();
 
         studentResponses.forEach(studentResponse -> {

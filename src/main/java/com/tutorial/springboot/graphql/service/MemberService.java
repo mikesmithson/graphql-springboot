@@ -38,7 +38,6 @@ public class MemberService {
                         .id(member.getId())
                         .name(String.join(" ", member.getFirstName(), member.getLastName()))
                         .contact(member.getContact())
-                        .courses(resultService.getResultForTeacher(member.getId()))
                         .build())
                 .toList();
     }

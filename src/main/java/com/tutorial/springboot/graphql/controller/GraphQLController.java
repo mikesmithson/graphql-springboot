@@ -3,6 +3,7 @@ package com.tutorial.springboot.graphql.controller;
 import com.tutorial.springboot.graphql.response.StudentResponse;
 import com.tutorial.springboot.graphql.response.StudentSubjectResponse;
 import com.tutorial.springboot.graphql.response.TeacherResponse;
+import com.tutorial.springboot.graphql.response.TeacherSubjectResponse;
 import com.tutorial.springboot.graphql.service.MemberService;
 import com.tutorial.springboot.graphql.service.ResultService;
 import lombok.RequiredArgsConstructor;
@@ -44,5 +45,9 @@ public class GraphQLController {
     @BatchMapping(typeName = "StudentResponse", field = "result", maxBatchSize = 10)
     public Map<StudentResponse, List<StudentSubjectResponse>> getResultsAllStudents(List<StudentResponse> studentResponses) {
         return resultService.getResultForAllStudents(studentResponses);
+    }
+    @BatchMapping(typeName = "TeacherResponse", field = "courses", maxBatchSize = 10)
+    public Map<TeacherResponse, List<TeacherSubjectResponse>> getResultsForAllTeachers(List<TeacherResponse> teacherResponses) {
+        return resultService.getresultsForAllTeachers(teacherResponses);
     }
 }

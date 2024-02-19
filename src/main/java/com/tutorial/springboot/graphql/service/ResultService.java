@@ -1,10 +1,12 @@
 package com.tutorial.springboot.graphql.service;
 
 import com.tutorial.springboot.graphql.entity.Result;
+import com.tutorial.springboot.graphql.entity.Subject;
 import com.tutorial.springboot.graphql.repository.ResultRepository;
 import com.tutorial.springboot.graphql.repository.SubjectRepository;
 import com.tutorial.springboot.graphql.response.StudentResponse;
 import com.tutorial.springboot.graphql.response.StudentSubjectResponse;
+import com.tutorial.springboot.graphql.response.TeacherResponse;
 import com.tutorial.springboot.graphql.response.TeacherSubjectResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,6 +55,24 @@ public class ResultService {
                                     .subjectName(result.getSubject().getSubjectName())
                                     .build()).toList();
                     batchMap.put(studentResponse, studentSubjectResponses);
+                }
+        );
+        return batchMap;
+    }
+
+    public Map<TeacherResponse, List<TeacherSubjectResponse>> getresultsForAllTeachers(List<TeacherResponse> teacherResponses) {
+        log.debug("fetching all teachers");
+        List<Subject> results = StreamSupport.stream(subjectRepository.findAll().spliterator(), false).toList();
+        Map<TeacherResponse, List<TeacherSubjectResponse>> batchMap = new LinkedHashMap<>();
+
+        teacherResponses.forEach(teacherResponse -> {
+                    List<TeacherSubjectResponse> teacherSubjectResponses = results.stream()
+                            .filter(result -> teacherResponse.getId() == result.getTeacher().getId())
+                            .map(result -> TeacherSubjectResponse.builder()
+                                    .subjectName(result.getSubjectName())
+                                    .experience(result.getExperience())
+                                    .build()).toList();
+                    batchMap.put(teacherResponse, teacherSubjectResponses);
                 }
         );
         return batchMap;

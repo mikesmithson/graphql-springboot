@@ -9,5 +9,4 @@ import java.util.List;
 
 @Repository
 public interface ResultRepository extends CrudRepository<Result, ResultID> {
-    List<Result> findByStudentId(int studentId);
 }

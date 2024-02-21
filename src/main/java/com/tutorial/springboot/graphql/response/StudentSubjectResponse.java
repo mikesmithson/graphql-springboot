@@ -1,11 +1,10 @@
 package com.tutorial.springboot.graphql.response;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-@Builder
-public class StudentSubjectResponse {
-    private String subjectName;
+@Getter
+@Setter
+public class StudentSubjectResponse extends SubjectResponse {
     private double marks;
 }

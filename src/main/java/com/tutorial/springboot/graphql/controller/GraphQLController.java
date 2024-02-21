@@ -1,18 +1,16 @@
 package com.tutorial.springboot.graphql.controller;
 
-import com.tutorial.springboot.graphql.response.StudentResponse;
-import com.tutorial.springboot.graphql.response.StudentSubjectResponse;
-import com.tutorial.springboot.graphql.response.TeacherResponse;
-import com.tutorial.springboot.graphql.response.TeacherSubjectResponse;
+import com.tutorial.springboot.graphql.entity.MemberType;
+import com.tutorial.springboot.graphql.response.MemberResponse;
 import com.tutorial.springboot.graphql.service.MemberService;
 import com.tutorial.springboot.graphql.service.ResultService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.BatchMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
-import org.springframework.graphql.data.method.annotation.SchemaMapping;
 import org.springframework.stereotype.Controller;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,21 +31,23 @@ public class GraphQLController {
     }
 
     @QueryMapping
-    public List<StudentResponse> getAllStudents() {
-        return memberService.getAllStudents();
+    public List<MemberResponse> getMembers(@Argument("filter") MemberType memberType) {
+        return memberService.getAllMembers(memberType);
     }
 
-    @QueryMapping
-    public List<TeacherResponse> getAllTeachers() {
-        return memberService.getAllTeachers();
+    @BatchMapping(typeName = "MemberResponse", field = "subjectData", maxBatchSize = 10)
+    public Map<MemberResponse, List<?>> getSubjectsForMembers(List<MemberResponse> members) {
+        List<MemberResponse> studentsResponse = members.stream()
+                .filter(response -> response.getType().equals(MemberType.STUDENT)).toList();
+        List<MemberResponse> teacherResponse = members.stream()
+                .filter(response -> response.getType().equals(MemberType.TEACHER)).toList();
+        Map<MemberResponse, List<?>> outputMap = new LinkedHashMap<>();
+        if (studentsResponse.isEmpty()) {
+            outputMap.putAll(resultService.getresultsForAllTeachers(members));
+        } else {
+            outputMap.putAll(resultService.getResultForAllStudents(members));
+        }
+        return outputMap;
     }
 
-    @BatchMapping(typeName = "StudentResponse", field = "result", maxBatchSize = 10)
-    public Map<StudentResponse, List<StudentSubjectResponse>> getResultsAllStudents(List<StudentResponse> studentResponses) {
-        return resultService.getResultForAllStudents(studentResponses);
-    }
-    @BatchMapping(typeName = "TeacherResponse", field = "courses", maxBatchSize = 10)
-    public Map<TeacherResponse, List<TeacherSubjectResponse>> getResultsForAllTeachers(List<TeacherResponse> teacherResponses) {
-        return resultService.getresultsForAllTeachers(teacherResponses);
-    }
 }

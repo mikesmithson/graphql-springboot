@@ -1,43 +1,36 @@
 package com.tutorial.springboot.graphql.service;
 
+import com.tutorial.springboot.graphql.entity.Member;
 import com.tutorial.springboot.graphql.entity.MemberType;
 import com.tutorial.springboot.graphql.repository.MemberRepository;
-import com.tutorial.springboot.graphql.response.StudentResponse;
-import com.tutorial.springboot.graphql.response.TeacherResponse;
+import com.tutorial.springboot.graphql.response.MemberResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class MemberService {
     private final MemberRepository memberRepository;
-    private final ResultService resultService;
 
-    public List<StudentResponse> getAllStudents() {
-        log.debug("In Member service fetching students");
-        return memberRepository.findByType(MemberType.STUDENT.toString())
-                .stream()
-                .map(member -> StudentResponse.builder()
+    public List<MemberResponse> getAllMembers(MemberType memberType) {
+        log.debug("In Member service fetching members");
+        List<Member> members;
+        if (memberType.equals(MemberType.ALL)) {
+            members = StreamSupport.stream(memberRepository.findAll().spliterator(), true).toList();
+        } else {
+            members = memberRepository.findByType(memberType.toString());
+        }
+        return members.stream()
+                .map(member -> MemberResponse.builder()
                         .id(member.getId())
                         .name(String.join(" ", member.getFirstName(), member.getLastName()))
                         .contact(member.getContact())
-                        .build())
-                .toList();
-
-    }
-
-    public List<TeacherResponse> getAllTeachers() {
-        log.debug("In Member service fetching teachers");
-        return memberRepository.findByType(MemberType.TEACHER.toString())
-                .stream()
-                .map(member -> TeacherResponse.builder()
-                        .id(member.getId())
-                        .name(String.join(" ", member.getFirstName(), member.getLastName()))
-                        .contact(member.getContact())
+                        .type(MemberType.valueOf(member.getType()))
                         .build())
                 .toList();
     }

@@ -5,33 +5,36 @@ type Query{
     # Second query with arguments
     secondQuery(firstName:String!, lastName:String!): String
 
-    # Get all Students' Records
-    getAllStudents:[StudentResponse]
-
-    # Get all teachers with experience and subjects
-    getAllTeachers:[TeacherResponse]
+    # Get all the members records with filtering options for Teacher/Student
+    getMembers(filter: MemberType): [MemberResponse]
 }
 
-type StudentResponse {
+type MemberResponse {
     id: ID!
     name: String!
     contact: String
-    result: [StudentSubjectResponse]
+    type: MemberType
+    subjectData: [SubjectResponse]
 }
 
-type StudentSubjectResponse {
+type StudentSubjectResponse implements SubjectResponse {
     subjectName: String!
     marks: Float
 }
 
-type TeacherResponse {
-    id: ID!
-    name: String!
-    contact: String
-    courses:[TeacherCourseResponse]
-}
-
-type TeacherCourseResponse {
+type TeacherSubjectResponse implements SubjectResponse {
     subjectName: String!
     experience: String!
 }
+
+interface SubjectResponse {
+    subjectName: String!
+}
+
+enum MemberType {
+    TEACHER
+    STUDENT
+    ALL
+}
+
+

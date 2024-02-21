@@ -4,15 +4,16 @@ import com.tutorial.springboot.graphql.entity.Result;
 import com.tutorial.springboot.graphql.entity.Subject;
 import com.tutorial.springboot.graphql.repository.ResultRepository;
 import com.tutorial.springboot.graphql.repository.SubjectRepository;
-import com.tutorial.springboot.graphql.response.StudentResponse;
+import com.tutorial.springboot.graphql.response.MemberResponse;
 import com.tutorial.springboot.graphql.response.StudentSubjectResponse;
-import com.tutorial.springboot.graphql.response.TeacherResponse;
 import com.tutorial.springboot.graphql.response.TeacherSubjectResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.StreamSupport;
 
 @Service
@@ -22,59 +23,38 @@ public class ResultService {
     private final ResultRepository resultRepository;
     private final SubjectRepository subjectRepository;
 
-    public List<StudentSubjectResponse> getResultForStudent(int studentId) {
-        log.debug("In Result service fetching student grades");
-        return resultRepository.findByStudentId(studentId).stream()
-                .map(result -> StudentSubjectResponse.builder()
-                        .subjectName(result.getSubject().getSubjectName())
-                        .marks(result.getMarks())
-                        .build())
-                .toList();
-    }
-
-    public List<TeacherSubjectResponse> getResultForTeacher(int teacherId) {
-        log.debug("In Result service fetching teacher subjects");
-        return subjectRepository.findSubjectsByTeacher_Id(teacherId).stream()
-                .map(result -> TeacherSubjectResponse.builder()
-                        .subjectName(result.getSubjectName())
-                        .experience(result.getExperience())
-                        .build())
-                .toList();
-    }
-
-    public Map<StudentResponse, List<StudentSubjectResponse>> getResultForAllStudents(List<StudentResponse> studentResponses) {
-        log.debug("fetching all responses");
+    public Map<MemberResponse, List<?>> getResultForAllStudents(List<MemberResponse> memberResponses) {
+        log.debug("fetching all student responses");
         List<Result> results = StreamSupport.stream(resultRepository.findAll().spliterator(), false).toList();
-        Map<StudentResponse, List<StudentSubjectResponse>> batchMap = new LinkedHashMap<>();
+        Map<MemberResponse, List<?>> batchMap = new LinkedHashMap<>();
 
-        studentResponses.forEach(studentResponse -> {
-                    List<StudentSubjectResponse> studentSubjectResponses = results.stream()
-                            .filter(result -> studentResponse.getId() == result.getStudent().getId())
-                            .map(result -> StudentSubjectResponse.builder()
-                                    .marks(result.getMarks())
-                                    .subjectName(result.getSubject().getSubjectName())
-                                    .build()).toList();
-                    batchMap.put(studentResponse, studentSubjectResponses);
-                }
-        );
+        memberResponses.forEach(memberResponse -> {
+            List<StudentSubjectResponse> studentSubjectResponses = results.stream().filter(result -> memberResponse.getId() == result.getStudent().getId()).map(result -> {
+                StudentSubjectResponse studentSubjectResponse = new StudentSubjectResponse();
+                studentSubjectResponse.setMarks(result.getMarks());
+                studentSubjectResponse.setSubjectName(result.getSubject().getSubjectName());
+                return studentSubjectResponse;
+            }).toList();
+
+            batchMap.put(memberResponse, studentSubjectResponses);
+        });
         return batchMap;
     }
 
-    public Map<TeacherResponse, List<TeacherSubjectResponse>> getresultsForAllTeachers(List<TeacherResponse> teacherResponses) {
+    public Map<MemberResponse, List<?>> getresultsForAllTeachers(List<MemberResponse> memberResponses) {
         log.debug("fetching all teachers");
-        List<Subject> results = StreamSupport.stream(subjectRepository.findAll().spliterator(), false).toList();
-        Map<TeacherResponse, List<TeacherSubjectResponse>> batchMap = new LinkedHashMap<>();
+        List<Subject> subjects = StreamSupport.stream(subjectRepository.findAll().spliterator(), false).toList();
+        Map<MemberResponse, List<?>> batchMap = new LinkedHashMap<>();
 
-        teacherResponses.forEach(teacherResponse -> {
-                    List<TeacherSubjectResponse> teacherSubjectResponses = results.stream()
-                            .filter(result -> teacherResponse.getId() == result.getTeacher().getId())
-                            .map(result -> TeacherSubjectResponse.builder()
-                                    .subjectName(result.getSubjectName())
-                                    .experience(result.getExperience())
-                                    .build()).toList();
-                    batchMap.put(teacherResponse, teacherSubjectResponses);
-                }
-        );
+        memberResponses.forEach(memberResponse -> {
+            List<TeacherSubjectResponse> teacherSubjectResponses = subjects.stream().filter(subject -> memberResponse.getId() == subject.getTeacher().getId()).map(subject -> {
+                TeacherSubjectResponse response = new TeacherSubjectResponse();
+                response.setExperience(subject.getExperience());
+                response.setSubjectName(subject.getSubjectName());
+                return response;
+            }).toList();
+            batchMap.put(memberResponse, teacherSubjectResponses);
+        });
         return batchMap;
     }
 }

@@ -56,11 +56,11 @@ public class ResultService {
     }
 
     private List<Subject> fetchAllSubjects() {
-        return StreamSupport.stream(subjectRepository.findAll().spliterator(), false).toList();
+        return StreamSupport.stream(subjectRepository.findAll().spliterator(), true).toList();
     }
 
     private List<Result> fetchAllResults() {
-        return StreamSupport.stream(resultRepository.findAll().spliterator(), false).toList();
+        return StreamSupport.stream(resultRepository.findAll().spliterator(), true).toList();
     }
 
     private static List<TeacherSubjectResponse> createTeacherSubjectResponses(List<Subject> subjects, Integer memberId) {

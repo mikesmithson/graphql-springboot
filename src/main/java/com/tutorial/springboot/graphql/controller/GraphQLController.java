@@ -39,14 +39,13 @@ public class GraphQLController {
 
     @BatchMapping(typeName = "MemberResponse", field = "subjectData", maxBatchSize = 10)
     public Map<MemberResponse, List<?>> getSubjectsForMembers(List<MemberResponse> members) {
-        List<MemberResponse> studentsResponse = members.stream()
-                .filter(response -> response.getType().equals(MemberType.STUDENT)).toList();
         Map<MemberResponse, List<?>> outputMap = new LinkedHashMap<>();
-        if (studentsResponse.isEmpty()) {
-            outputMap.putAll(resultService.getMemberResponseForAllTeachers(members));
-        } else {
-            outputMap.putAll(resultService.getMemberResponseForAllStudents(members));
-        }
+        List<MemberResponse> studentMemberResponses = members.stream().filter(member -> member.getType().equals(MemberType.STUDENT)).toList();
+        List<MemberResponse> teacherMemberResponses = members.stream().filter(member -> member.getType().equals(MemberType.TEACHER)).toList();
+
+        outputMap.putAll(resultService.getMemberResponseForAllTeachers(teacherMemberResponses));
+        outputMap.putAll(resultService.getMemberResponseForAllStudents(studentMemberResponses));
+
         return outputMap;
     }
 
@@ -54,6 +53,7 @@ public class GraphQLController {
     public List<MemberSearchResult> getSearchResult(@Argument String name) {
         return memberService.getMemberByFirstName(name);
     }
+
     @BatchMapping(typeName = "MemberSearchResult", field = "subjectData")
     public Map<MemberSearchResult, List<?>> getSearchData(List<MemberSearchResult> members) {
         Map<MemberSearchResult, List<?>> outputMap = new LinkedHashMap<>();

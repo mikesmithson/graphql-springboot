@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Service
@@ -27,37 +28,16 @@ public class ResultService {
     public Map<MemberResponse, List<?>> getMemberResponseForAllStudents(List<MemberResponse> memberResponses) {
         log.debug("fetching all student responses");
         List<Result> results = StreamSupport.stream(resultRepository.findAll().spliterator(), false).toList();
-        Map<MemberResponse, List<?>> batchMap = new LinkedHashMap<>();
-
-        memberResponses.forEach(memberResponse -> {
-            List<StudentSubjectResponse> studentSubjectResponses = results.stream().filter(result -> memberResponse.getId() == result.getStudent().getId()).map(result -> {
-                StudentSubjectResponse studentSubjectResponse = new StudentSubjectResponse();
-                studentSubjectResponse.setMarks(result.getMarks());
-                studentSubjectResponse.setSubjectName(result.getSubject().getSubjectName());
-                return studentSubjectResponse;
-            }).toList();
-
-            batchMap.put(memberResponse, studentSubjectResponses);
-        });
-        return batchMap;
+        return memberResponses.stream()
+                .collect(Collectors.toMap(memberResponse ->  memberResponse, memberResponse -> createStudentSubjectResponses(results, memberResponse.getId())));
     }
 
     public Map<MemberSearchResult, List<?>> getMemberSearchResultsForAllStudents(List<MemberSearchResult> studentResponses) {
         log.debug("fetching all student search results");
         List<Result> results = StreamSupport.stream(resultRepository.findAll().spliterator(), false).toList();
-        Map<MemberSearchResult, List<?>> batchMap = new LinkedHashMap<>();
 
-        studentResponses.forEach(studentResponse -> {
-            List<StudentSubjectResponse> studentSubjectResponses = results.stream().filter(result -> studentResponse.getId() == result.getStudent().getId()).map(result -> {
-                StudentSubjectResponse studentSubjectResponse = new StudentSubjectResponse();
-                studentSubjectResponse.setMarks(result.getMarks());
-                studentSubjectResponse.setSubjectName(result.getSubject().getSubjectName());
-                return studentSubjectResponse;
-            }).toList();
-
-            batchMap.put(studentResponse, studentSubjectResponses);
-        });
-        return batchMap;
+        return studentResponses.stream()
+                .collect(Collectors.toMap(studentResponse -> studentResponse, studentResponse -> createStudentSubjectResponses(results, studentResponse.getId())));
     }
 
     public Map<MemberSearchResult, List<?>> getMemberSearchResultsForAllTeachers(List<MemberSearchResult> teacherResponses) {
@@ -93,5 +73,14 @@ public class ResultService {
             batchMap.put(memberResponse, teacherSubjectResponses);
         });
         return batchMap;
+    }
+
+    private static List<StudentSubjectResponse> createStudentSubjectResponses(List<Result> results, int memberResponseId) {
+        return results.stream().filter(result -> memberResponseId == result.getStudent().getId()).map(result -> {
+            StudentSubjectResponse studentSubjectResponse = new StudentSubjectResponse();
+            studentSubjectResponse.setMarks(result.getMarks());
+            studentSubjectResponse.setSubjectName(result.getSubject().getSubjectName());
+            return studentSubjectResponse;
+        }).toList();
     }
 }

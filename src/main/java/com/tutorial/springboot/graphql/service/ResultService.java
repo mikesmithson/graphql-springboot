@@ -5,6 +5,7 @@ import com.tutorial.springboot.graphql.entity.Subject;
 import com.tutorial.springboot.graphql.repository.ResultRepository;
 import com.tutorial.springboot.graphql.repository.SubjectRepository;
 import com.tutorial.springboot.graphql.response.MemberResponse;
+import com.tutorial.springboot.graphql.response.MemberSearchResult;
 import com.tutorial.springboot.graphql.response.StudentSubjectResponse;
 import com.tutorial.springboot.graphql.response.TeacherSubjectResponse;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ public class ResultService {
     private final ResultRepository resultRepository;
     private final SubjectRepository subjectRepository;
 
-    public Map<MemberResponse, List<?>> getResultForAllStudents(List<MemberResponse> memberResponses) {
+    public Map<MemberResponse, List<?>> getMemberResponseForAllStudents(List<MemberResponse> memberResponses) {
         log.debug("fetching all student responses");
         List<Result> results = StreamSupport.stream(resultRepository.findAll().spliterator(), false).toList();
         Map<MemberResponse, List<?>> batchMap = new LinkedHashMap<>();
@@ -41,7 +42,43 @@ public class ResultService {
         return batchMap;
     }
 
-    public Map<MemberResponse, List<?>> getresultsForAllTeachers(List<MemberResponse> memberResponses) {
+    public Map<MemberSearchResult, List<?>> getMemberSearchResultsForAllStudents(List<MemberSearchResult> studentResponses) {
+        log.debug("fetching all student search results");
+        List<Result> results = StreamSupport.stream(resultRepository.findAll().spliterator(), false).toList();
+        Map<MemberSearchResult, List<?>> batchMap = new LinkedHashMap<>();
+
+        studentResponses.forEach(studentResponse -> {
+            List<StudentSubjectResponse> studentSubjectResponses = results.stream().filter(result -> studentResponse.getId() == result.getStudent().getId()).map(result -> {
+                StudentSubjectResponse studentSubjectResponse = new StudentSubjectResponse();
+                studentSubjectResponse.setMarks(result.getMarks());
+                studentSubjectResponse.setSubjectName(result.getSubject().getSubjectName());
+                return studentSubjectResponse;
+            }).toList();
+
+            batchMap.put(studentResponse, studentSubjectResponses);
+        });
+        return batchMap;
+    }
+
+    public Map<MemberSearchResult, List<?>> getMemberSearchResultsForAllTeachers(List<MemberSearchResult> teacherResponses) {
+        log.debug("fetching all student search results");
+        List<Subject> results = StreamSupport.stream(subjectRepository.findAll().spliterator(), false).toList();
+        Map<MemberSearchResult, List<?>> batchMap = new LinkedHashMap<>();
+
+        teacherResponses.forEach(teacherResponse -> {
+            List<TeacherSubjectResponse> teacherSubjectResponses = results.stream().filter(result -> teacherResponse.getId() == result.getTeacher().getId()).map(result -> {
+                TeacherSubjectResponse teacherSubjectResponse = new TeacherSubjectResponse();
+                teacherSubjectResponse.setSubjectName(result.getSubjectName());
+                teacherSubjectResponse.setExperience(result.getExperience());
+                return teacherSubjectResponse;
+            }).toList();
+
+            batchMap.put(teacherResponse, teacherSubjectResponses);
+        });
+        return batchMap;
+    }
+
+    public Map<MemberResponse, List<?>> getMemberResponseForAllTeachers(List<MemberResponse> memberResponses) {
         log.debug("fetching all teachers");
         List<Subject> subjects = StreamSupport.stream(subjectRepository.findAll().spliterator(), false).toList();
         Map<MemberResponse, List<?>> batchMap = new LinkedHashMap<>();

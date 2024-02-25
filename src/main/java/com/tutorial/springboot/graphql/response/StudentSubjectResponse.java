@@ -5,6 +5,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class StudentSubjectResponse extends SubjectResponse {
+public class StudentSubjectResponse extends SubjectResponse implements SearchResult {
     private double marks;
 }

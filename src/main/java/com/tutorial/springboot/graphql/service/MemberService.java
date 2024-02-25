@@ -4,6 +4,8 @@ import com.tutorial.springboot.graphql.entity.Member;
 import com.tutorial.springboot.graphql.entity.MemberType;
 import com.tutorial.springboot.graphql.repository.MemberRepository;
 import com.tutorial.springboot.graphql.response.MemberResponse;
+import com.tutorial.springboot.graphql.response.MemberSearchResult;
+import graphql.com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -33,5 +35,16 @@ public class MemberService {
                         .type(MemberType.valueOf(member.getType()))
                         .build())
                 .toList();
+    }
+
+    public List<MemberSearchResult> getMemberByFirstName(String name) {
+        return memberRepository.findByFirstName(name)
+                .orElse(Lists.newArrayList()).stream().map(member ->
+                MemberSearchResult.builder()
+                        .id(member.getId())
+                        .type(MemberType.valueOf(member.getType()))
+                        .name(String.join(" ",member.getFirstName(),member.getLastName()))
+                        .contact(member.getContact())
+                        .build()).toList();
     }
 }

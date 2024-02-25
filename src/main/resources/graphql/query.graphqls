@@ -7,6 +7,8 @@ type Query{
 
     # Get all the members records with filtering options for Teacher/Student
     getMembers(filter: MemberType): [MemberResponse]
+
+    searchByName(name: String): [MemberSearchResult]
 }
 
 type MemberResponse {
@@ -37,4 +39,12 @@ enum MemberType {
     ALL
 }
 
+union SearchResult = StudentSubjectResponse | TeacherSubjectResponse
 
+type MemberSearchResult {
+    id: ID!
+    name: String!
+    contact: String
+    type: MemberType
+    subjectData: [SearchResult]
+}

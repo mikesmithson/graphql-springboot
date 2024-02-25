@@ -2,6 +2,8 @@ package com.tutorial.springboot.graphql.controller;
 
 import com.tutorial.springboot.graphql.entity.MemberType;
 import com.tutorial.springboot.graphql.response.MemberResponse;
+import com.tutorial.springboot.graphql.response.MemberSearchResult;
+import com.tutorial.springboot.graphql.response.StudentSubjectResponse;
 import com.tutorial.springboot.graphql.service.MemberService;
 import com.tutorial.springboot.graphql.service.ResultService;
 import lombok.RequiredArgsConstructor;
@@ -39,14 +41,28 @@ public class GraphQLController {
     public Map<MemberResponse, List<?>> getSubjectsForMembers(List<MemberResponse> members) {
         List<MemberResponse> studentsResponse = members.stream()
                 .filter(response -> response.getType().equals(MemberType.STUDENT)).toList();
-        List<MemberResponse> teacherResponse = members.stream()
-                .filter(response -> response.getType().equals(MemberType.TEACHER)).toList();
         Map<MemberResponse, List<?>> outputMap = new LinkedHashMap<>();
         if (studentsResponse.isEmpty()) {
-            outputMap.putAll(resultService.getresultsForAllTeachers(members));
+            outputMap.putAll(resultService.getMemberResponseForAllTeachers(members));
         } else {
-            outputMap.putAll(resultService.getResultForAllStudents(members));
+            outputMap.putAll(resultService.getMemberResponseForAllStudents(members));
         }
+        return outputMap;
+    }
+
+    @QueryMapping(name = "searchByName")
+    public List<MemberSearchResult> getSearchResult(@Argument String name) {
+        return memberService.getMemberByFirstName(name);
+    }
+    @BatchMapping(typeName = "MemberSearchResult", field = "subjectData")
+    public Map<MemberSearchResult, List<?>> getSearchData(List<MemberSearchResult> members) {
+        Map<MemberSearchResult, List<?>> outputMap = new LinkedHashMap<>();
+
+        List<MemberSearchResult> studentResults = members.stream().filter(member -> member.getType().equals(MemberType.STUDENT)).toList();
+        List<MemberSearchResult> teacherResults = members.stream().filter(member -> member.getType().equals(MemberType.TEACHER)).toList();
+
+        outputMap.putAll(resultService.getMemberSearchResultsForAllStudents(studentResults));
+        outputMap.putAll(resultService.getMemberSearchResultsForAllTeachers(teacherResults));
         return outputMap;
     }
 

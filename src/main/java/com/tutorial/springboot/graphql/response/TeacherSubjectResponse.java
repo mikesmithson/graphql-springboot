@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class TeacherSubjectResponse extends SubjectResponse {
+public class TeacherSubjectResponse extends SubjectResponse implements SearchResult {
     private Integer experience;
 
 }

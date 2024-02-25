@@ -38,7 +38,7 @@ public class MemberService {
     }
 
     public List<MemberSearchResult> getMemberByFirstName(String name) {
-        return memberRepository.findByFirstName(name)
+        return memberRepository.findByFirstNameStartsWith(name)
                 .orElse(Lists.newArrayList()).stream().map(member ->
                 MemberSearchResult.builder()
                         .id(member.getId())

@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface MemberRepository extends CrudRepository<Member, Integer> {
     List<Member> findByType(String type);
     Optional<List<Member>> findByFirstName(String name);
+    Optional<List<Member>> findByFirstNameStartsWith(String name);
 }
